@@ -1,0 +1,15 @@
+kafka-topics.sh --list --bootstrap-server localhost:9092
+kafka-topics.sh --create --topic ocf_1 --bootstrap-server localhost:9092 --partitions 1 --replication-factor 1
+kafka-topics.sh --create --topic license-topic --bootstrap-server localhost:9092 --partitions 1 --replication-factor 1
+
+kafka-topics.sh --delete --topic connect-offsets --bootstrap-server localhost:9092
+
+kafka-topics.sh --describe --topic connect-status --bootstrap-server kafka:9092
+kafka-topics.sh --describe --topic connect-configs --bootstrap-server kafka:9092
+kafka-topics.sh --describe --topic connect-offsets --bootstrap-server kafka:9092
+kafka-topics.sh --describe --topic license-topic --bootstrap-server localhost:9092
+kafka-topics.sh --describe --topic ocf_1 --bootstrap-server localhost:9092
+sh -c '/configure-kafka.sh && /bin/bash'
+kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic ocf_1 --from-beginning
+kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic ocf_derive
+curl -X POST -H "Content-Type: application/json" --data @mqtt-config.json http://localhost:8083/connectors

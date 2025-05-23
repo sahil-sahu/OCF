@@ -1,0 +1,25 @@
+{
+    "name": "mqtt-source",
+    "config": {
+      "connector.class": "io.lenses.streamreactor.connect.mqtt.source.MqttSourceConnector",
+      "tasks.max": "1",
+  
+      "connect.mqtt.kcql": "INSERT INTO ocf_1 SELECT * FROM ocf_1 WITHCONVERTER=`io.lenses.streamreactor.connect.converters.source.JsonSimpleConverter`",
+  
+      "connect.mqtt.client.id": "ocf_source_client",
+      "connect.mqtt.hosts": "tcp://192.168.31.61:1883",
+      "connect.mqtt.service.quality": "1",
+      "connect.mqtt.clean": "true",
+      "connect.mqtt.keep.alive": "5000",
+  
+      "connect.mqtt.error.policy": "RETRY",
+      "connect.mqtt.retry.interval": "10000",
+      "connect.mqtt.max.retries": "5",
+  
+      "connect.mqtt.log.message": "true",
+      "connect.mqtt.polling.timeout": "1000",
+      "connect.progress.enabled": "true",
+      "connect.mqtt.retained.messages": "false"
+    }
+  }
+  

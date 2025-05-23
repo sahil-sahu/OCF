@@ -1,0 +1,127 @@
+version: '2'
+
+services:
+  zookeeper:
+    image: wurstmeister/zookeeper:latest
+    ports:
+      - "2181:2181"
+
+  kafka0:
+    image: wurstmeister/kafka:latest
+    ports:
+      - "9090:9092"  # Exposing Kafka's port 9092 on the host as 9090
+      # - "9091:9093"  # Exposing Kafka's inter-broker port 9093 on the host as 9091
+    expose:
+      - "9092"  
+      - "9093"  
+    environment:
+      KAFKA_ADVERTISED_LISTENERS: INSIDE://kafka0:9093,OUTSIDE://kafka0:9092  # Adjusted advertised listeners for this broker
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
+      KAFKA_LISTENERS: INSIDE://0.0.0.0:9093,OUTSIDE://0.0.0.0:9092  # Set outside to match host port
+      KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+    volumes:
+      - ./configure-kafka.sh:/configure-kafka.sh  # Mount the script in the container
+    # command: "sh -c '/configure-kafka.sh && /bin/bash'"  
+
+  kafka1:
+    image: wurstmeister/kafka:latest
+    ports:
+      - "9092:9092"  # Exposing Kafka's port 9092 directly on the host
+      # - "9093:9093"  # Exposing Kafka's inter-broker port 9093
+    expose:
+      - "9092"  
+      - "9093"    
+    environment:
+      KAFKA_ADVERTISED_LISTENERS: INSIDE://kafka1:9093,OUTSIDE://kafka1:9092  # Adjusted for this broker
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
+      KAFKA_LISTENERS: INSIDE://0.0.0.0:9093,OUTSIDE://0.0.0.0:9092
+      KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+    volumes:
+      - ./configure-kafka.sh:/configure-kafka.sh  # Mount the script in the container
+    # command: "sh -c '/configure-kafka.sh && /bin/bash'"  
+
+  kafka2:
+    image: wurstmeister/kafka:latest
+    ports:
+      - "9094:9092"  # Exposing Kafka's port 9092 on the host as 9094
+      # - "9095:9093"  # Exposing Kafka's inter-broker port 9093 on the host as 9095
+    expose:
+      - "9092"  
+      - "9093"    
+    environment:
+      KAFKA_ADVERTISED_LISTENERS: INSIDE://kafka2:9093,OUTSIDE://kafka2:9092  # Adjusted for this broker
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
+      KAFKA_LISTENERS: INSIDE://0.0.0.0:9093,OUTSIDE://0.0.0.0:9092  # Set outside to match host port
+      KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+    volumes:
+      - ./configure-kafka.sh:/configure-kafka.sh  # Mount the script in the container
+    # command: "sh -c '/configure-kafka.sh && /bin/bash'"  
+
+  kafka-connect:
+    image: confluentinc/cp-kafka-connect:latest
+    depends_on:
+      - kafka0
+      - kafka1
+      - kafka2
+    ports:
+      - "8083:8083"  # Exposing Kafka Connect's REST API
+    environment:
+      CONNECT_BOOTSTRAP_SERVERS: kafka0:9093,kafka1:9093,kafka2:9093  # Bootstrap servers for Kafka Connect
+      CONNECT_REST_PORT: 8083
+      CONNECT_GROUP_ID: "connect-cluster"
+      CONNECT_CONFIG_STORAGE_TOPIC: "connect-configs"
+      CONNECT_OFFSET_STORAGE_TOPIC: "connect-offsets"
+      CONNECT_STATUS_STORAGE_TOPIC: "connect-status"
+      CONNECT_KEY_CONVERTER: "org.apache.kafka.connect.storage.StringConverter"
+      CONNECT_VALUE_CONVERTER: "org.apache.kafka.connect.storage.StringConverter"
+      CONNECT_INTERNAL_KEY_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      CONNECT_INTERNAL_VALUE_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      CONNECT_REST_ADVERTISED_HOST_NAME: "kafka-connect"
+      CONNECT_PLUGIN_PATH: "/usr/share/java,/etc/kafka-connect/jars"
+      CONNECT_LOG4J_LOGGERS: "org.apache.zookeeper=ERROR,org.I0Itec.zkclient=ERROR,org.reflections=ERROR"
+    volumes:
+        - ./confluentinc-kafka-connect-mqtt-1.7.4:/etc/kafka-connect/jars/mqtt
+        - ./confluentinc-kafka-connect-s3-10.6.4:/etc/kafka-connect/jars/s3
+        - ./kafka-connect-mqtt-8.1.31:/etc/kafka-connect/jars/mqtt2
+        - ./kafka-connect-influxdb-8.1.32:/etc/kafka-connect/jars/influx
+
+
+  kafkaconsumer:
+    image: kafkaconsumer:latest
+    depends_on:
+      - kafka0
+    build:
+      context: ./consumer
+      dockerfile: Dockerfile
+    volumes:
+      - ./consumer:/app   
+  mqtt_broker:
+    image: eclipse-mosquitto
+    container_name: mqtt_broker
+    volumes:
+      - ./mosquitto.conf:/mosquitto/config/mosquitto.conf
+    ports:
+      - 1883:1883
+
+  grafana:
+    image: grafana/grafana-enterprise:latest
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+
+  influxdb:
+    image: influxdb:1.8
+    ports:
+      - "8086:8086"
+    environment:
+      INFLUXDB_DB: wave_data
+      INFLUXDB_ADMIN_USER: admin
+      INFLUXDB_ADMIN_PASSWORD: admin               
+
+networks:
+  ocfweb:
