@@ -1,0 +1,5 @@
+confluentinc-kafka-connect-mqtt-1.7.3/** filter=lfs diff=lfs merge=lfs -text
+confluentinc-kafka-connect-mqtt-1.7.4/** filter=lfs diff=lfs merge=lfs -text
+confluentinc-kafka-connect-s3-10.6.4/** filter=lfs diff=lfs merge=lfs -text
+kafka-connect-influxdb-8.1.32/** filter=lfs diff=lfs merge=lfs -text
+kafka-connect-mqtt-8.1.31/** filter=lfs diff=lfs merge=lfs -text
