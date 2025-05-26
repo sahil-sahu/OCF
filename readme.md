@@ -11,6 +11,7 @@ A final-year engineering project developed around a **10-meter flume-based Open 
 ---
 
 ## 📸 Project Preview
+![1747559746215](https://github.com/user-attachments/assets/67cdd47b-469f-410b-bc25-d4f870f179e5)
 
 ### 🔧 Flume-Based Setup
 ![1747559752465](https://github.com/user-attachments/assets/b273a0d4-b2e3-40eb-adad-55d344386c99)
