@@ -3,7 +3,8 @@ import math
 import paho.mqtt.client as mqtt
 import json
 # MQTT Config
-BROKER = "localhost"         # Change to your broker's address
+# BROKER = "localhost"         # Change to your broker's address
+BROKER = "10.1.23.254"         # Change to your broker's address
 PORT = 1883
 TOPIC = "ocf_1"
 
