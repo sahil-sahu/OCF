@@ -174,7 +174,7 @@ float height1=(tank_h-sina*stik_l);
   }*/
   snprintf (msg, MSG_BUFFER_SIZE, "%f ", height1);
    Serial.print("Publish message: ");
-    Serial.println(msg);
-    client.publish("device/tmp", msg);
+    String msg__ = "{\"height\":\"" + msg + "\"}";
+    client.publish("ocf_1", msg__.c_str());
 delay(40);
 }
