@@ -1,0 +1,269 @@
+ {
+	"info": {
+		"_postman_id": "98721d9b-7a85-4ae2-af01-bc2844155189",
+		"name": "OCF",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "28290163"
+	},
+	"item": [
+		{
+			"name": "Kafka",
+			"item": [
+				{
+					"name": "mqtt",
+					"item": [
+						{
+							"name": "add connector",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"name\": \"mqtt-source-connector\",\r\n    \"config\": {\r\n      \"connector.class\": \"io.confluent.connect.mqtt.MqttSourceConnector\",\r\n      \"tasks.max\": \"1\",\r\n      \"mqtt.server.uri\": \"tcp://192.168.29.48:1883\",\r\n      \"mqtt.topics\": \"ocf_1\",\r\n      \"kafka.topic\": \"ocf_1\",\r\n      \"mqtt.qos\": \"1\",\r\n      \"value.converter\": \"org.apache.kafka.connect.converters.ByteArrayConverter\",\r\n      \"confluent.topic.bootstrap.servers\": \"kafka0:9093\"\r\n    }\r\n  }\r\n  ",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{kafka_connect}}/connectors",
+									"host": [
+										"{{kafka_connect}}"
+									],
+									"path": [
+										"connectors"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "add lense one",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"name\": \"mqtt-source\",\r\n  \"config\": {\r\n    \"connector.class\": \"io.lenses.streamreactor.connect.mqtt.source.MqttSourceConnector\",\r\n    \"tasks.max\": \"1\",\r\n\r\n    // \"connect.mqtt.kcql\": \"INSERT INTO ocf_1 SELECT * FROM ocf_1\",\r\n    // \"connect.mqtt.kcql\": \"INSERT INTO ocf_1 SELECT * FROM ocf_1 WITHCONVERTER=`io.lenses.streamreactor.connect.converters.source.JsonSimpleConverter`\",\r\n    \"connect.mqtt.kcql\": \"INSERT INTO ocf_1 SELECT * FROM ocf_1 WITHCONVERTER=`io.lenses.streamreactor.connect.converters.source.JsonPassThroughConverter`\",\r\n\r\n    \r\n    //  \"connect.mqtt.kcql\": \"INSERT INTO ocf_1 SELECT * FROM ocf_1 WITHCONVERTER=`io.lenses.streamreactor.connect.converters.source.StringConverter`\",\r\n\r\n\r\n    \"connect.mqtt.client.id\": \"ocf_source_client\",\r\n    // \"connect.mqtt.hosts\": \"mqtt_broker:1883\",\r\n    \"connect.mqtt.hosts\": \"tcp://10.1.23.254:1883\",\r\n    \"connect.mqtt.service.quality\": \"1\",\r\n    \"connect.mqtt.clean\": \"true\",\r\n    \"connect.mqtt.keep.alive\": \"5000\",\r\n\r\n    \"connect.mqtt.error.policy\": \"RETRY\",\r\n    \"connect.mqtt.retry.interval\": \"10000\",\r\n    \"connect.mqtt.max.retries\": \"5\",\r\n\r\n    \"connect.mqtt.log.message\": \"true\",\r\n    \"connect.mqtt.polling.timeout\": \"1000\",\r\n    \"connect.progress.enabled\": \"true\",\r\n    \"connect.mqtt.retained.messages\": \"false\"\r\n  }\r\n}\r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{kafka_connect}}/connectors",
+									"host": [
+										"{{kafka_connect}}"
+									],
+									"path": [
+										"connectors"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete connector Copy",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{kafka_connect}}/connectors/mqtt-source",
+									"host": [
+										"{{kafka_connect}}"
+									],
+									"path": [
+										"connectors",
+										"mqtt-source"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "S3 connect",
+					"item": [
+						{
+							"name": "add connector",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"name\": \"r2-sink-connector\",\r\n  \"config\": {\r\n    \"connector.class\": \"io.confluent.connect.s3.S3SinkConnector\",\r\n    \"tasks.max\": \"1\",\r\n    \"topics\": \"ocf_derive\",\r\n    \"s3.bucket.name\": \"ocf\",\r\n    \"s3.region\": \"us-east-1\",\r\n    \"s3.endpoint\": \"https://a20b9831493170d34487748dbd94271.r2.cloudflarestorage.com\",\r\n    \"store.url\": \"https://a20b98314c93170d34487748dbd94271.r2.cloudflarestorage.com\",\r\n    \"s3.part.size\": \"5242880\",\r\n    \"flush.size\": \"10\",\r\n    \"rotate.interval.ms\": \"60000\",\r\n    \"format.class\": \"io.confluent.connect.s3.format.json.JsonFormat\",\r\n    \"storage.class\": \"io.confluent.connect.s3.storage.S3Storage\",\r\n    \"aws.access.key.id\": \"a811c0f78fa56835515512cea11807f3\",\r\n    \"aws.secret.access.key\": \"85a014753c5318672fc348abf2e748dc8a4b82485d12a3f5d8aee0f90bedbcba\"\r\n  }\r\n}\r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{kafka_connect}}/connectors",
+									"host": [
+										"{{kafka_connect}}"
+									],
+									"path": [
+										"connectors"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete connector Copy",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"name\": \"mqtt-source-connector\",\r\n    \"config\": {\r\n      \"connector.class\": \"io.confluent.connect.mqtt.MqttSourceConnector\",\r\n      \"tasks.max\": \"1\",\r\n      \"mqtt.server.uri\": \"tcp://192.168.31.21:1883\",\r\n      \"mqtt.topics\": \"ocf_1\",\r\n      \"kafka.topic\": \"ocf_1\",\r\n      \"mqtt.qos\": \"1\"\r\n    }\r\n}\r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{kafka_connect}}/connectors/r2-sink-connector",
+									"host": [
+										"{{kafka_connect}}"
+									],
+									"path": [
+										"connectors",
+										"r2-sink-connector"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "influx",
+					"item": [
+						{
+							"name": "add connector Copy",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"name\": \"influxdb-sink\",\r\n  \"config\": {\r\n    \"connector.class\": \"io.lenses.streamreactor.connect.influx.InfluxSinkConnector\",\r\n    \"tasks.max\": \"1\",\r\n    \"topics\": \"ocf_derive\",\r\n\r\n    \"key.converter\": \"org.apache.kafka.connect.json.JsonConverter\",\r\n    \"key.converter.schemas.enable\": \"false\",\r\n    \"value.converter\": \"org.apache.kafka.connect.json.JsonConverter\",\r\n    \"value.converter.schemas.enable\": \"false\",\r\n\r\n    \"connect.influx.url\": \"http://10.1.23.254:8086\",\r\n    \"connect.influx.db\": \"wave_data\",\r\n    \"connect.influx.username\": \"admin\",\r\n    \"connect.influx.password\": \"admin\",\r\n\r\n    \"connect.influx.kcql\": \"INSERT INTO wave_measures SELECT * FROM ocf_derive WITHTIMESTAMP timestamp\",\r\n\r\n    \"connect.influx.retention.policy\": \"autogen\",\r\n    \"connect.influx.ssl\": \"false\",\r\n    \"connect.influx.consistency.level\": \"ALL\",\r\n    \"connect.progress.enabled\": \"true\",\r\n\r\n    \"connect.influx.error.retry.interval\": \"60000\",\r\n    \"connect.influx.error.max.retries\": \"10\"\r\n  }\r\n}\r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{kafka_connect}}/connectors",
+									"host": [
+										"{{kafka_connect}}"
+									],
+									"path": [
+										"connectors"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete connector Copy 2",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"name\": \"mqtt-source-connector\",\r\n    \"config\": {\r\n      \"connector.class\": \"io.confluent.connect.mqtt.MqttSourceConnector\",\r\n      \"tasks.max\": \"1\",\r\n      \"mqtt.server.uri\": \"tcp://192.168.31.21:1883\",\r\n      \"mqtt.topics\": \"ocf_1\",\r\n      \"kafka.topic\": \"ocf_1\",\r\n      \"mqtt.qos\": \"1\"\r\n    }\r\n}\r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{kafka_connect}}/connectors/influxdb-sink",
+									"host": [
+										"{{kafka_connect}}"
+									],
+									"path": [
+										"connectors",
+										"influxdb-sink"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "{{kafka_connect}}/connector-plugins",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{kafka_connect}}/connector-plugins",
+							"host": [
+								"{{kafka_connect}}"
+							],
+							"path": [
+								"connector-plugins"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get connector used",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{kafka_connect}}/connectors",
+							"host": [
+								"{{kafka_connect}}"
+							],
+							"path": [
+								"connectors"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "kafka_connect",
+			"value": "http://localhost:8083",
+			"type": "string"
+		}
+	]
+}
